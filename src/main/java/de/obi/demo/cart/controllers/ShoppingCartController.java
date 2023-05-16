@@ -1,6 +1,6 @@
 package de.obi.demo.cart.controllers;
 
-import de.obi.demo.cart.dto.CartITemDto;
+import de.obi.demo.cart.dto.CartItemDto;
 import de.obi.demo.cart.model.Cart;
 import de.obi.demo.cart.services.ShoppingCartService;
 import org.springframework.http.HttpStatus;
@@ -36,8 +36,8 @@ public class ShoppingCartController {
     }
 
     @GetMapping("/{cartId}/items")
-    public ResponseEntity<CartITemDto> getCartItems(@PathVariable Long cartId) {
-        CartITemDto cartItems = shoppingCartService.getCartItems(cartId);
+    public ResponseEntity<CartItemDto> getCartItems(@PathVariable Long cartId) {
+        CartItemDto cartItems = shoppingCartService.getCartItems(cartId);
         return ResponseEntity.ok(cartItems);
     }
 

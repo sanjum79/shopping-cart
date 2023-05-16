@@ -1,6 +1,6 @@
 package de.obi.demo.cart.services;
 
-import de.obi.demo.cart.dto.CartITemDto;
+import de.obi.demo.cart.dto.CartItemDto;
 import de.obi.demo.cart.dto.ProductDto;
 import de.obi.demo.cart.exception.NotFoundException;
 import de.obi.demo.cart.exception.OutOfStockException;
@@ -17,9 +17,12 @@ import java.util.List;
 @Service
 public class ShoppingCartService {
 
-    private final CartRepository cartRepository;
-    private final CartItemRepository cartItemRepository;
-    private final ProductRepository productRepository;
+    private CartRepository cartRepository;
+    private CartItemRepository cartItemRepository;
+    private ProductRepository productRepository;
+
+    public ShoppingCartService() {
+    }
 
     public ShoppingCartService(CartRepository cartRepository, CartItemRepository cartItemRepository, ProductRepository productRepository) {
         this.cartRepository = cartRepository;
@@ -75,7 +78,7 @@ public class ShoppingCartService {
         cartItemRepository.deleteById(cartItemId);
     }
 
-    public CartITemDto getCartItems(Long cartId) {
+    public CartItemDto getCartItems(Long cartId) {
         Cart cart = getCart(cartId);
         List<CartItem> cartItems = cart.getCartItems();
 
@@ -89,7 +92,7 @@ public class ShoppingCartService {
         double totalCartPrice = productDtos.stream()
                 .mapToDouble(ProductDto::totalPrice)
                 .sum();
-        return new CartITemDto(cart.getId(), productDtos, totalCartPrice);
+        return new CartItemDto(cart.getId(), productDtos, totalCartPrice);
     }
 
     public double calculateCartTotalPrice(Long cartId) {
