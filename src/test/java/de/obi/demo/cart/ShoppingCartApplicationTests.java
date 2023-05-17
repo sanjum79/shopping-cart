@@ -31,14 +31,7 @@ class ShoppingCartApplicationTests {
 
     @BeforeEach
     public void setup() {
-
-//        doNothing().when(shoppingCartService).addItemToCart(1L, 1L, 5);
-
-//        Cart cart = new Cart(1L, new ArrayList<>());
-//        when(cartRepository.findById(1L))
-//                .thenReturn(Optional.of(cart));
-
-        initMocks(this); //without this you will get NPE
+        initMocks(this);
     }
 
     @Test

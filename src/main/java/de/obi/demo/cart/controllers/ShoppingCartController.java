@@ -25,13 +25,16 @@ public class ShoppingCartController {
 
     @PostMapping("/{cartId}/items")
     public ResponseEntity<String> addItemToCart(@PathVariable Long cartId, @RequestParam Long productId, @RequestParam int quantity) {
+        if(quantity <= 0) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Quantity should be more than zero.");
+        }
         shoppingCartService.addItemToCart(cartId, productId, quantity);
         return ResponseEntity.status(HttpStatus.CREATED).body("Item successfully added to cart.");
     }
 
-    @DeleteMapping("/items/{cartItemId}")
-    public ResponseEntity<String> removeItemFromCart(@PathVariable Long cartItemId) {
-        shoppingCartService.removeItemFromCart(cartItemId);
+    @DeleteMapping("/items/{productId}")
+    public ResponseEntity<String> removeItemFromCart(@PathVariable Long productId) {
+        shoppingCartService.removeProductFromCart(productId);
         return ResponseEntity.ok("Item removed from cart successfully");
     }
 
@@ -45,5 +48,11 @@ public class ShoppingCartController {
     public ResponseEntity<Double> calculateCartTotal(@PathVariable Long cartId) {
         double total = shoppingCartService.calculateCartTotalPrice(cartId);
         return ResponseEntity.ok(total);
+    }
+
+    @DeleteMapping("/{cartId}/empty")
+    public ResponseEntity<String> emptyCart(@PathVariable Long cartId) {
+        shoppingCartService.removeAllItemsFromCart(cartId);
+        return ResponseEntity.ok("All items of cart are removed");
     }
 }

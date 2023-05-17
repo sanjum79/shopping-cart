@@ -14,7 +14,7 @@ public class Cart {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "cart")
     private List<CartItem> cartItems = new ArrayList<>();
 
     public Cart() {
@@ -35,6 +35,10 @@ public class Cart {
 
     public List<CartItem> getCartItems() {
         return cartItems;
+    }
+
+    public void addCartItem(CartItem cartItem) {
+        cartItems.add(cartItem);
     }
 
     public void setCartItems(List<CartItem> cartItems) {

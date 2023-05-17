@@ -12,17 +12,18 @@ import de.obi.demo.cart.repositories.CartRepository;
 import de.obi.demo.cart.repositories.ProductRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class ShoppingCartService {
 
-    private CartRepository cartRepository;
-    private CartItemRepository cartItemRepository;
-    private ProductRepository productRepository;
+    private final CartRepository cartRepository;
+    private final CartItemRepository cartItemRepository;
+    private final ProductRepository productRepository;
 
-    public ShoppingCartService() {
-    }
+//    public ShoppingCartService() {
+//    }
 
     public ShoppingCartService(CartRepository cartRepository, CartItemRepository cartItemRepository, ProductRepository productRepository) {
         this.cartRepository = cartRepository;
@@ -63,7 +64,7 @@ public class ShoppingCartService {
             newItem.setCart(shoppingCart);
             newItem.setProduct(product);
             newItem.setQuantity(quantity);
-            shoppingCart.getCartItems().add(newItem);
+            shoppingCart.addCartItem(newItem);
             cartItemRepository.save(newItem);
         }
         product.setQuantity(product.getQuantity() - quantity);
@@ -76,6 +77,32 @@ public class ShoppingCartService {
         cartItemProduct.setQuantity(cartItem.getQuantity());
         productRepository.save(cartItemProduct);
         cartItemRepository.deleteById(cartItemId);
+    }
+
+    public void removeProductFromCart(Long productId) {
+        CartItem cartItem = cartItemRepository.getCartItemByProduct(productId);
+        if(cartItem == null) {
+            throw new NotFoundException("There is no product with productId: "+ productId + " to delete!");
+        }
+        Product product = cartItem.getProduct();
+        product.addToQuantity(cartItem.getQuantity());
+        productRepository.save(product);
+        cartItemRepository.deleteById(cartItem.getId());
+    }
+
+    public void removeAllItemsFromCart(Long cartId) {
+        Cart cart = getCart(cartId);
+        List<CartItem> cartItems = cart.getCartItems();
+        if(cartItems.isEmpty()) {
+            throw new NotFoundException("There are no items in the cart.");
+        }
+        for (CartItem cartItem : cartItems) {
+            Product cartItemProduct = cartItem.getProduct();
+            cartItemProduct.addToQuantity(cartItem.getQuantity());
+            productRepository.save(cartItemProduct);
+            cartItemRepository.deleteById(cartItem.getId());
+        }
+        cart.setCartItems(new ArrayList<>());
     }
 
     public CartItemDto getCartItems(Long cartId) {

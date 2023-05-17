@@ -2,6 +2,7 @@ package de.obi.demo.cart.services;
 
 import de.obi.demo.cart.dto.CartItemDto;
 import de.obi.demo.cart.dto.ProductDto;
+import de.obi.demo.cart.exception.NotFoundException;
 import de.obi.demo.cart.exception.OutOfStockException;
 import de.obi.demo.cart.model.Cart;
 import de.obi.demo.cart.model.CartItem;
@@ -108,13 +109,67 @@ public class ShoppingCartServiceTest {
         cart.setCartItems(List.of(cartItem));
 
         // When
-        when(cartItemRepository.getReferenceById(cartItemId))
+        when(cartItemRepository.getCartItemByProduct(productId))
                 .thenReturn(cartItem);
 
         // Then
         assertThat("product quantity before removal", product.getQuantity() == 0);
-        shoppingCartService.removeItemFromCart(cartItemId);
+        shoppingCartService.removeProductFromCart(productId);
         assertThat("product quantity after removal", product.getQuantity() == 5);
+    }
+
+    @Test
+    public void removeUnavailableItemShouldThrowException() {
+        // Given
+        Long cartId = 1L;
+        Long productId = 1L;
+        Long cartItemId = 1L;
+        Cart cart = new Cart(cartId, new ArrayList<>());
+        Product product = new Product(productId, "product-1", 50.0, 0);
+        CartItem cartItem = new CartItem(cartItemId, cart, product, 5);
+        cart.setCartItems(List.of(cartItem));
+
+        Exception exception = Assertions.assertThrows(NotFoundException.class,
+                () -> shoppingCartService.removeProductFromCart(2L));
+        assertThat("Exception Message", exception.getMessage().equals("There is no product with productId: 2 to delete!"));
+    }
+
+    @Test
+    public void shouldRemoveAllCartItems() {
+        // Given
+        Long cartId = 1L;
+        Cart cart = new Cart(cartId, new ArrayList<>());
+        Product product1 = new Product(1L, "product-1", 50.0, 5);
+        Product product2 = new Product(2L, "product-2", 40.0, 5);
+        Product product3 = new Product(3L, "product-3", 30.0, 5);
+        CartItem cartItem1 = new CartItem(1L, cart, product1, 2);
+        CartItem cartItem2 = new CartItem(2L, cart, product2, 2);
+        CartItem cartItem3 = new CartItem(3L, cart, product3, 2);
+        cart.setCartItems(List.of(cartItem1, cartItem2, cartItem3));
+
+        // When
+        when(cartRepository.findById(cartId))
+                .thenReturn(Optional.of(cart));
+
+        // Then
+        shoppingCartService.removeAllItemsFromCart(cartId);
+        assertThat("Empty cart items",cart.getCartItems().isEmpty());
+    }
+
+    @Test
+    public void emptyingAlreadyEmptyCartShouldThrowException() {
+        // Given
+        Long cartId = 1L;
+        Cart cart = new Cart(cartId, new ArrayList<>());
+
+        // When
+        when(cartRepository.findById(cartId))
+                .thenReturn(Optional.of(cart));
+
+        // Then
+        Exception exception = Assertions.assertThrows(NotFoundException.class,
+                () -> shoppingCartService.removeAllItemsFromCart(cartId));
+        assertThat("Exception Message", exception.getMessage().equals("There are no items in the cart."));
     }
 
     @Test
